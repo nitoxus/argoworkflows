@@ -3,9 +3,40 @@ kind: Workflow
 metadata:
   generateName: aqua-scanner-
 spec:
-  entrypoint: aqua-scanner        
+  entrypoint: image-scanner
+  arguments:
+    parameters:
+    - name: aqua-server
+      value: "http://aqua-console-svc.aqua:8080"      
   templates:
-  - name: aqua-scanner            
+  - name: image-scanner
+    steps:
+      - - name: scan-busybox
+          template: aqua-scanner
+          arguments:
+            parameters:
+            - name: registry
+              value: "Docker Hub" 
+            - name: image
+              value: "busybox"
+            - name: tag
+              value: latest
+        - name: scan-nginx
+          template: aqua-scanner
+          arguments:
+            parameters:
+            - name: registry
+              value: "Docker Hub" 
+            - name: image
+              value: "nginx"
+            - name: tag
+              value: latest 
+  - name: aqua-scanner
+    inputs:
+      parameters:
+      - name: registry
+      - name: image
+      - name: tag             
     container:
       image: registry.aquasec.com/scanner:5.3
-      args: [scan, --host, http://aqua-console-svc.aqua:8080, --user, scanner, --password, scanner123!, --registry, 'Docker Hub', busybox:latest] 
+      args: [scan, --host, "{{ workflow.parameters.aqua-server }}" , --user, scanner, --password, scanner123!, --registry, "{{ inputs.parameters.registry }}", "{{ inputs.parameters.image }}:{{ inputs.parameters.tag }}"] 
