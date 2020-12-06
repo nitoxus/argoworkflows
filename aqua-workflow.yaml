@@ -1,0 +1,11 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: aqua-scanner-  # Name of this Workflow
+spec:
+  entrypoint: aqua-scanner        # Defines "whalesay" as the "main" template
+  templates:
+  - name: aqua-scanner            # Defining the "whalesay" template
+    container:
+      image: registry.aquasec.com/scanner:5.3
+      args: [scan, --host, http://aqua-console-svc.aqua:8080, --user, scanner, --password, scanner123!, --registry, 'Docker Hub', busybox:latest] 
